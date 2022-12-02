@@ -61,10 +61,10 @@ public class Caption extends ImageCommand {
 
 
         g2d.drawImage(edit,0,offsetY, null);
-        System.out.println(attachment.getFileExtension());
-        ImageIO.write(finalImg,"png",output);
+        ImageIO.write(finalImg, Objects.requireNonNull(attachment.getFileExtension()),output);
         FileUpload fileUpload = FileUpload.fromData(output);
 
+        // Delte original file after upload
         event.replyFiles(fileUpload).queue((f) ->{
                 output.delete();
                 });
