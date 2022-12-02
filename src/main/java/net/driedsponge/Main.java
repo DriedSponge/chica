@@ -28,9 +28,11 @@ public class Main {
 
 
         JDA jda = builder.build();
-        jda.updateCommands().addCommands(Commands.slash("caption","Add a caption to an image!")
-                                .addOption(OptionType.STRING,"caption","The caption for the image.",true)
-                .addOption(OptionType.ATTACHMENT,"image","The image to edit.",false)
+        jda.updateCommands().addCommands(
+                Commands.slash("caption","Add a caption to an image!")
+                        .addOption(OptionType.STRING,"caption","Your caption.",true)
+                        .addOption(OptionType.ATTACHMENT,"image","An image/gif to upload.",false)
+                        .addOption(OptionType.STRING,"url","An image/gif URL.",false)
                 )
                 .queue();
 

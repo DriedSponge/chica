@@ -4,7 +4,6 @@ import net.driedsponge.utils.AliasedImage;
 import net.driedsponge.utils.StringUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public class Caption extends ImageCommand {
 
@@ -31,7 +29,6 @@ public class Caption extends ImageCommand {
         String caption = Objects.requireNonNull(event.getOption("caption")).getAsString();
         this.width = edit.getWidth();
         int originalY = edit.getHeight();
-
 
 
 
@@ -65,7 +62,7 @@ public class Caption extends ImageCommand {
         FileUpload fileUpload = FileUpload.fromData(output);
 
         // Delete original file after upload
-        event.replyFiles(fileUpload).queue((f) ->{
+        event.getHook().sendFiles(fileUpload).queue((f) ->{
                 output.delete();
                 });
         input.delete();
@@ -91,7 +88,6 @@ public class Caption extends ImageCommand {
         FontMetrics fontMetrics = g2d.getFontMetrics();
         g2d.setColor(Color.BLACK);
         for(int i = 0; i<strings.size(); i++) {
-            System.out.println(strings.get(i));
             g2d.drawString(strings.get(i), (width - fontMetrics.stringWidth(strings.get(i)))/2,  fontMetrics.getHeight() + (i * fontMetrics.getHeight()));
         }
     }
