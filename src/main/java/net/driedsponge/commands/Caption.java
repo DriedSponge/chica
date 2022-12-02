@@ -4,6 +4,7 @@ import net.driedsponge.utils.AliasedImage;
 import net.driedsponge.utils.StringUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
@@ -14,12 +15,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class Caption extends ImageCommand {
 
     private int width;
     private int offsetY;
-    private int textMargin;
 
     public Caption() {
         super("caption");
@@ -38,12 +39,12 @@ public class Caption extends ImageCommand {
         InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("roboto-bold.ttf");
         float fontSize = 100f - ((caption.length() * 0.5f));
         Font roboto = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(fontSize);
-        BufferedImage image = new BufferedImage(width, originalY,BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics2D = image.createGraphics();
+        BufferedImage buildImg = new BufferedImage(width, originalY,BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics2D = buildImg.createGraphics();
         graphics2D.setFont(roboto);
         FontMetrics fontMetrics = graphics2D.getFontMetrics();
         graphics2D.dispose();
-        this.textMargin = width - (width/20);
+        int textMargin = width - (width/20);
 
         ArrayList<String> strings = StringUtils.wrapText(caption, fontMetrics, textMargin);
 
@@ -60,11 +61,13 @@ public class Caption extends ImageCommand {
 
 
         g2d.drawImage(edit,0,offsetY, null);
-
+        System.out.println(attachment.getFileExtension());
         ImageIO.write(finalImg,"png",output);
         FileUpload fileUpload = FileUpload.fromData(output);
-        event.replyFiles(fileUpload).queue();
-        output.delete();
+
+        event.replyFiles(fileUpload).queue((f) ->{
+                output.delete();
+                });
         input.delete();
         g2d.dispose();
 
