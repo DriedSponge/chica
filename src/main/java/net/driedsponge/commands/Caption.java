@@ -64,7 +64,7 @@ public class Caption extends ImageCommand {
         ImageIO.write(finalImg, Objects.requireNonNull(attachment.getFileExtension()),output);
         FileUpload fileUpload = FileUpload.fromData(output);
 
-        // Delte original file after upload
+        // Delete original file after upload
         event.replyFiles(fileUpload).queue((f) ->{
                 output.delete();
                 });
