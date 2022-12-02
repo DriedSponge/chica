@@ -29,8 +29,9 @@ public class Main {
 
         JDA jda = builder.build();
         jda.updateCommands().addCommands(Commands.slash("caption","Add a caption to an image!")
-                .addOption(OptionType.ATTACHMENT,"image","The image to edit.",true)
-                .addOption(OptionType.STRING,"caption","The caption for the image.",true))
+                                .addOption(OptionType.STRING,"caption","The caption for the image.",true)
+                .addOption(OptionType.ATTACHMENT,"image","The image to edit.",false)
+                )
                 .queue();
 
     }

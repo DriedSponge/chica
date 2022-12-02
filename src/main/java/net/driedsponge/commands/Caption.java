@@ -36,7 +36,7 @@ public class Caption extends ImageCommand {
 
 
         // Import Font
-        InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("roboto-bold.ttf");
+        InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("futura.otf");
         float fontSize = 100f - ((caption.length() * 0.5f));
         Font roboto = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(fontSize);
         BufferedImage buildImg = new BufferedImage(width, originalY,BufferedImage.TYPE_INT_RGB);

@@ -16,6 +16,9 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Class for automatically processing commands meant for images.
+ */
 public class ImageCommand extends ListenerAdapter {
     private String name;
 
@@ -28,7 +31,7 @@ public class ImageCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event){
         if(event.getName().equals(this.name) || Arrays.asList(this.alias).contains(event.getName())){
-
+            event.deferReply();
             Message.Attachment file = event.getOption("image").getAsAttachment();
             int randomId = new Random().nextInt(1000);
             File storage = new File("./temp/"+Integer.toString(randomId)+file.getFileName());
