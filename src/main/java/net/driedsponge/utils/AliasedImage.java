@@ -8,8 +8,8 @@ import java.awt.image.BufferedImage;
  */
 public class AliasedImage extends BufferedImage {
     private Graphics2D g2d;
-    public AliasedImage(int width, int height){
-        super(width,height,BufferedImage.TYPE_INT_RGB);
+    public AliasedImage(int width, int height, int type){
+        super(width,height, type);
         this.g2d = this.createGraphics();
         this.g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         this.g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);

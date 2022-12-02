@@ -29,14 +29,20 @@ public class Caption extends ImageCommand {
         String caption = Objects.requireNonNull(event.getOption("caption")).getAsString();
         this.width = edit.getWidth();
         int originalY = edit.getHeight();
-
-
+        int bufferedImageType;
+        if(attachment.getFileExtension().equals("jpeg")|| attachment.getFileExtension().equals("jpg")){
+            bufferedImageType = BufferedImage.TYPE_INT_RGB;
+            System.out.println("Jpeg");
+        }else{
+            bufferedImageType = BufferedImage.TYPE_INT_ARGB;
+            System.out.println("Not jpeg");
+        }
 
         // Import Font
         InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("futura.otf");
         float fontSize = 100f - ((caption.length() * 0.5f));
         Font roboto = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(fontSize);
-        BufferedImage buildImg = new BufferedImage(width, originalY,BufferedImage.TYPE_INT_RGB);
+        BufferedImage buildImg = new BufferedImage(width, originalY, bufferedImageType);
         Graphics2D graphics2D = buildImg.createGraphics();
         graphics2D.setFont(roboto);
         FontMetrics fontMetrics = graphics2D.getFontMetrics();
@@ -48,7 +54,7 @@ public class Caption extends ImageCommand {
         int textHeight = fontMetrics.getHeight();
         this.offsetY = (textHeight*strings.size()) + 30;
 
-        AliasedImage finalImg = new AliasedImage(width, offsetY + originalY);
+        AliasedImage finalImg = new AliasedImage(width, offsetY + originalY, bufferedImageType);
 
         Graphics2D g2d = finalImg.getG2d();
 
