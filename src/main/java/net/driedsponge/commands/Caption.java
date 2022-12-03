@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -25,10 +26,10 @@ public class Caption extends ImageCommand {
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event, Message.Attachment attachment, File input, BufferedImage edit, File output) throws IOException, FontFormatException {
+    public void execute(SlashCommandInteractionEvent event, Message.Attachment attachment, File input, Image edit, File output) throws IOException, FontFormatException {
         String caption = Objects.requireNonNull(event.getOption("caption")).getAsString();
-        this.width = edit.getWidth();
-        int originalY = edit.getHeight();
+        this.width = edit.getWidth(null);
+        int originalY = edit.getHeight(null);
         int bufferedImageType;
         if(attachment.getFileExtension().equals("jpeg")|| attachment.getFileExtension().equals("jpg")){
             bufferedImageType = BufferedImage.TYPE_INT_RGB;
@@ -61,7 +62,6 @@ public class Caption extends ImageCommand {
         g2d.setFont(roboto);
         drawBgRect(g2d);
         drawText(g2d,strings);
-
 
         g2d.drawImage(edit,0,offsetY, null);
         ImageIO.write(finalImg, Objects.requireNonNull(attachment.getFileExtension()),output);

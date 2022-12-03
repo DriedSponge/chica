@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -38,12 +39,13 @@ public class ImageCommand extends ListenerAdapter {
             System.out.println(event.getOption("link"));
             Message.Attachment file = event.getOption("image").getAsAttachment();
             int randomId = new Random().nextInt(1000);
-            File storage = new File("./temp/"+Integer.toString(randomId)+file.getFileName());
+            File storage = new File("./temp/"+ randomId +file.getFileName());
             CompletableFuture<File> downloadToFile = file.getProxy().downloadToFile(storage);
-            File output = new File("./temp/"+Integer.toString(randomId)+file.getFileName()+"_"+this.name+"."+file.getFileExtension());
+            File output = new File("./temp/"+this.name+"_"+ randomId+file.getFileName());
             try {
                 File original = downloadToFile.get();
-                execute(event, file, original, ImageIO.read(original),output);
+                Image img = new ImageIcon(original.toURI().toURL()).getImage();
+                execute(event, file, original, img,output);
             } catch (InterruptedException | ExecutionException | IllegalArgumentException | IOException | FontFormatException e) {
                 sendError(e.getMessage());
             }
@@ -66,5 +68,5 @@ public class ImageCommand extends ListenerAdapter {
      * @throws IOException
      * @throws FontFormatException
      */
-    public void execute(SlashCommandInteractionEvent event, Message.Attachment attachment, File source, BufferedImage edit, File destination) throws IOException, FontFormatException {}
+    public void execute(SlashCommandInteractionEvent event, Message.Attachment attachment, File source, Image edit, File destination) throws IOException, FontFormatException {}
 }
