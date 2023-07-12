@@ -1,5 +1,5 @@
 import {SlashCommand} from "../SlashCommand";
-import {CanvasRenderingContext2D, createCanvas, Image, loadImage,  registerFont} from "canvas";
+import {Canvas, CanvasRenderingContext2D, createCanvas, Image, loadImage, registerFont} from "canvas";
 import {
     Attachment, ChatInputCommandInteraction,
     CommandInteraction,
@@ -8,7 +8,8 @@ import {
     SlashCommandStringOption
 } from "discord.js";
 import {StringUtils} from "../../utils/StringUtils";
-
+import {CommandUtils} from "../../utils/CommandUtils";
+import {EditImage} from "../../utils/EditImage";
 export class Meme extends SlashCommand{
     constructor() {
         const data : SlashCommandBuilder = new SlashCommandBuilder()
@@ -23,26 +24,40 @@ export class Meme extends SlashCommand{
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
 
         const text : string = interaction.options.getString("text", true);
-        const attachment : any = interaction.options.getAttachment("image", false);
+        try{
+            await interaction.deferReply();
+            const editImage : EditImage = CommandUtils.processImageCommand(interaction);
+            const image: Image = await loadImage(editImage.getUrl());
+            const fontSize : number = Math.min(image.width,image.height) / 8;
+            const canvas: Canvas = createCanvas(image.width, image.height);
+            const ctx : CanvasRenderingContext2D = canvas.getContext("2d");
+            // Check if the image is static
+            if(editImage.getType() === "image/png" || editImage.getType() === "image/jpeg" || editImage.getType() === "image/jpg"){
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                this.memeText(canvas, text, fontSize);
+            }else{
+
+            }
 
 
-        const image: Image = await loadImage(attachment.url)
 
-        const fontSize : number = Math.min(image.width,image.height) / 8;
+            const buffer : Buffer = canvas.toBuffer();
 
+            await interaction.followUp({files: [{ attachment: buffer, name:"meme."+editImage.getExtension()}]});
+        }catch (e) {
+            await interaction.followUp({content: "**Error:** "+e, ephemeral: true})
+        }
 
-        const canvas = createCanvas(image.width, image.height);
-
-        const ctx : CanvasRenderingContext2D = canvas.getContext("2d");
-
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
+    private memeText(canvas : Canvas, text : string, fontSize : number): void{
+        let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
         ctx.font = `bold ${fontSize.toString()}px Impact`;
         ctx.strokeStyle = "#000000";
         ctx.lineWidth = (fontSize / 30);
         ctx.fillStyle = "#ffffff";
-
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
+
         const lines : string[] = text.split("|");
         const topText : string = lines[0].trim();
 
@@ -62,13 +77,6 @@ export class Meme extends SlashCommand{
         for(let i: number = 0; i < topLines.length; i++) {
             ctx.fillText(topLines[i], canvas.width / 2, (i * fontSize) + 20, canvas.width);
             ctx.strokeText(topLines[i], canvas.width / 2, (i * fontSize) + 20, canvas.width);
-
         }
-
-
-        const buffer : Buffer = canvas.toBuffer();
-
-        await interaction.reply({files: [{ attachment: buffer, name:"meme.png"}]});
     }
-
 }
