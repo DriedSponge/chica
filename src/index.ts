@@ -1,4 +1,4 @@
-import {Client, Collection, Events, GatewayIntentBits, Interaction, REST, Routes} from "discord.js"
+import {Activity, Client, Collection, Events, GatewayIntentBits, Interaction, REST, Routes} from "discord.js"
 import {SlashCommand} from "./commands/SlashCommand";
 import {Ping} from "./commands/Ping";
 import "dotenv/config"
@@ -16,17 +16,18 @@ commands.set("meme", new Meme());
 client.on(Events.ClientReady, async (client: Client ): Promise<void> => {
     registerFont(__dirname+"/../resources/fonts/impact.ttf", {family: "Impact"});
     console.log("Client is ready and logged in!");
+        client.user.setPresence({ activities: [{ name: 'Brink' }], status: 'online' })
     const cmdsfinal: any[] = []
 
     const rest: REST = new REST().setToken(process.env.TOKEN);
-    await rest.put(Routes.applicationCommands(process.env.CLIENTID), { body: [] })
-        .then(() => console.log('Successfully deleted all application commands.'))
-        .catch(console.error);
     console.log(`Started refreshing ${commands.size} application (/) commands.`);
     commands.forEach(command => {
         cmdsfinal.push(command.getCommandData().toJSON())
     })
-    await rest.put(Routes.applicationCommands(process.env.CLIENTID), { body: cmdsfinal })
+    await rest.put(Routes.applicationCommands(process.env.CLIENTID), { body: cmdsfinal }).then((res) => {
+        console.log('Successfully reloaded application (/) commands.');
+        console.log(res)
+    }) .catch(console.error);
 
 })
 
