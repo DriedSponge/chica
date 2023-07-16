@@ -24,7 +24,6 @@ export class Meme extends SlashCommand{
     }
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
-
         const text : string = interaction.options.getString("text", true);
         try{
             await interaction.deferReply();
@@ -41,44 +40,51 @@ export class Meme extends SlashCommand{
 
                 await interaction.followUp({files: [{ attachment: buffer, name:"meme."+editImage.getExtension()}]});
             }else{
-                await axios.get(editImage.getUrl(), {responseType: 'arraybuffer'}).then(async (response) => {
-                    let gifBuffer : Buffer = response.data;
+                    // If the image is a gif, we need to process each frame
+                    let gifBuffer : Buffer = editImage.getData();
                     const gif: Gif = await GifUtil.read(gifBuffer);
 
                     for (const frame of gif.frames) {
-                        console.log("Frame stuff")
+                        console.log("Processing Gift Frame");
                         // Create a canvas for the gif frame
                         const gifCanvas: Canvas = createCanvas(canvas.width,  canvas.height);
+                        // Get the context of the canvas
                         const gifCtx: CanvasRenderingContext2D = gifCanvas.getContext("2d");
+                        // Get the image data from the frame
                         const frameImage: Buffer = frame.bitmap.data;
+                        // Create an image data object from the frame
                         const frameImageData: ImageData = <ImageData>ctx.createImageData(frame.bitmap.width, frame.bitmap.height);
+                        // Set the image data to the frame image
                         frameImageData.data.set(frameImage);
+                        // Put the image data on the gif canvas
                         gifCtx.putImageData(frameImageData, frame.xOffset, frame.yOffset);
-                        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+                        // Clear the main canvas
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        // Draw the gif frame on the main canvas
                         ctx.drawImage(gifCanvas, frame.xOffset, frame.yOffset, frame.bitmap.width, frame.bitmap.height)
+                        // Put the text on the main canvas
                         this.memeText(canvas, text, fontSize);
+                        // Get the image data from the main canvas
                         const modifiedFrameImage: ImageData = <ImageData>ctx.getImageData(frame.xOffset,frame.yOffset, frame.bitmap.width, frame.bitmap.height);
+                        // Create a buffer for the image data
                         const modifiedFrameBuffer: Buffer = Buffer.alloc(modifiedFrameImage.data.length);
+                        // Set the buffer to the image data
                         modifiedFrameBuffer.set(modifiedFrameImage.data);
+                        // Create a bitmap image from the buffer
                         const frameBitmap: BitmapImage = new BitmapImage(frame.bitmap.width, frame.bitmap.height, modifiedFrameBuffer);
-
-                        GifUtil.quantizeSorokin(frameBitmap, 10,undefined,{ditherAlgorithm:"FalseFloydSteinberg"}) // This is the fastest
+                        // Quantize the bitmap image
+                        GifUtil.quantizeSorokin(frameBitmap, 256,undefined,{ditherAlgorithm:"FalseFloydSteinberg"}) // This is the fastest
+                        // Set the frame bitmap to the quantized bitmap
                         frame.bitmap.data.set(frameBitmap.bitmap.data);
                     }
+                    // Encode the gif
                     const codec: GifCodec = new GifCodec();
-
                     const gifBuffer2: Gif = await codec.encodeGif(gif.frames, {loops: gif.loops});
                     const embed: EmbedBuilder  = new EmbedBuilder();
                     embed.setImage("attachment://meme."+editImage.getExtension());
                     embed.setFooter({text: `${image.width}x${image.height}  | Frames: ${gif.frames.length} | Time Taken: ${(Date.now() - interaction.createdTimestamp)/1000}s`})
                     await interaction.followUp({files: [{ attachment: gifBuffer2.buffer, name:"meme."+editImage.getExtension()}], embeds: [embed]});
-
-                });
-
             }
-
-
-
         }catch (e) {
             console.log(e)
             console.log(e.stack)
