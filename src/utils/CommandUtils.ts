@@ -53,7 +53,6 @@ export class CommandUtils {
             if(response.data.byteLength > 25000000){
                 throw new Error("The image must be less than 25mb! We will work on supporting larger images soon!");
             }
-            console.log(response.headers["content-type"]);
             if(CommandUtils.imageExtensions.includes(response.headers["content-type"])) {
                 return new EditImage(response.headers["content-type"], url, Buffer.from(response.data));
             }else{
