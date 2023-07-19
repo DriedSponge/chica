@@ -87,7 +87,7 @@ export class Meme extends SlashCommand{
             }
         }catch (e) {
             console.log(e)
-            await interaction.followUp({content: "**Error:** "+e, ephemeral: true})
+            await interaction.followUp({content: "**Error:** "+e.message, ephemeral: true})
         }
 
     }
