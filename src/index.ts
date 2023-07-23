@@ -4,7 +4,7 @@ import {Ping} from "./commands/Ping";
 import "dotenv/config"
 import {Meme} from "./commands/image/Meme";
 import {registerFont} from "canvas";
-const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent] });
 const commands : Collection<string, SlashCommand> = new Collection<string, SlashCommand>();
 
 client.login(process.env.TOKEN).then(r => console.log("Logged in!"));
