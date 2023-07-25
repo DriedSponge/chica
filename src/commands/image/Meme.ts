@@ -43,9 +43,10 @@ export class Meme extends SlashCommand{
                     // If the image is a gif, we need to process each frame
                     let gifBuffer : Buffer = editImage.getData();
                     const gif: Gif = await GifUtil.read(gifBuffer);
-
+                    let i :number = 0
                     for (const frame of gif.frames) {
-                        console.log("Processing Gift Frame");
+                        i++
+                        console.log(`[${i}/${gif.frames.length}] Processing Gift Frame`);
                         // Create a canvas for the gif frame
                         const gifCanvas: Canvas = createCanvas(canvas.width,  canvas.height);
                         // Get the context of the canvas
