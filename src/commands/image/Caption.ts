@@ -12,7 +12,7 @@ import {
 import {StringUtils} from "../../utils/StringUtils";
 import {CommandUtils} from "../../utils/CommandUtils";
 import {EditImage} from "../../utils/EditImage";
-export class Meme extends SlashCommand{
+export class Caption extends SlashCommand{
     constructor() {
         const data : SlashCommandBuilder = new SlashCommandBuilder()
         data.setName("caption")
@@ -29,15 +29,27 @@ export class Meme extends SlashCommand{
             await interaction.deferReply();
             const editImage : EditImage = await CommandUtils.processImageCommand(interaction);
             const image: Image = await loadImage(editImage.getData());
-            const fontSize : number = Math.min(image.width,image.height) / 8;
-            const canvas: Canvas = createCanvas(image.width, image.height);
-            const ctx : CanvasRenderingContext2D = canvas.getContext("2d");
-            // Check if the image is static
-            if(editImage.getType() === "image/png" || editImage.getType() === "image/jpeg" || editImage.getType() === "image/jpg"){
-                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                this.captionText(canvas, text, fontSize);
-                const buffer : Buffer = canvas.toBuffer();
+            const fontSize : number = Math.min(image.width,image.height) / 9;
+            const tempCanvas: Canvas = createCanvas(image.width, image.height);
+            const tempCtx : CanvasRenderingContext2D = tempCanvas.getContext("2d");
+            tempCtx.font = `bold ${fontSize.toString()}px Caption`;
+            const lines : string[] = StringUtils.wrapText(tempCtx, text, tempCanvas.width);
+            const textHeight: number = (tempCtx.measureText(lines[0]).actualBoundingBoxAscent * (lines.length+1))+20;
+            const canvas: Canvas = createCanvas(image.width, image.height+textHeight);
 
+            const ctx : CanvasRenderingContext2D = canvas.getContext("2d");
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.font = `bold ${fontSize.toString()}px Caption`;
+            ctx.fillRect(0,0,canvas.width,textHeight)
+            ctx.fillStyle = "#000000";
+
+            // Check if the image is static
+            if(editImage.isStatic()){
+                ctx.drawImage(image, 0, textHeight, canvas.width, image.height);
+                this.captionText(canvas, lines, fontSize);
+                const buffer : Buffer = canvas.toBuffer();
                 await interaction.followUp({files: [{ attachment: buffer, name:"meme."+editImage.getExtension()}]});
             }else{
                 // If the image is a gif, we need to process each frame
@@ -47,7 +59,7 @@ export class Meme extends SlashCommand{
                 for (const frame of gif.frames) {
                     console.log("Processing Gift Frame");
                     // Create a canvas for the gif frame
-                    const gifCanvas: Canvas = createCanvas(canvas.width,  canvas.height);
+                    const gifCanvas: Canvas = createCanvas(canvas.width,  image.height);
                     // Get the context of the canvas
                     const gifCtx: CanvasRenderingContext2D = gifCanvas.getContext("2d");
                     // Get the image data from the frame
@@ -61,11 +73,11 @@ export class Meme extends SlashCommand{
                     // Clear the main canvas
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     // Draw the gif frame on the main canvas
-                    ctx.drawImage(gifCanvas, frame.xOffset, frame.yOffset, frame.bitmap.width, frame.bitmap.height)
+                    ctx.drawImage(gifCanvas, frame.xOffset+textHeight, frame.yOffset, frame.bitmap.width, frame.bitmap.height)
                     // Put the text on the main canvas
-                    this.captionText(canvas, text, fontSize);
+                    this.captionText(canvas, lines, fontSize);
                     // Get the image data from the main canvas
-                    const modifiedFrameImage: ImageData = <ImageData>ctx.getImageData(frame.xOffset,frame.yOffset, frame.bitmap.width, frame.bitmap.height);
+                    const modifiedFrameImage: ImageData = <ImageData>ctx.getImageData(frame.xOffset+textHeight,frame.yOffset, frame.bitmap.width, frame.bitmap.height);
                     // Create a buffer for the image data
                     const modifiedFrameBuffer: Buffer = Buffer.alloc(modifiedFrameImage.data.length);
                     // Set the buffer to the image data
@@ -91,34 +103,10 @@ export class Meme extends SlashCommand{
         }
 
     }
-    private captionText(canvas : Canvas, text : string, fontSize : number): void{
+    private captionText(canvas : Canvas, lines : string[], fontSize : number): void{
         let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-        ctx.font = `bold ${fontSize.toString()}px Impact`;
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = (fontSize / 30);
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-
-        const lines : string[] = text.split("|");
-        const topText : string = lines[0].trim();
-
-        // Bottom Text Stuff
-        if(lines.length >1){
-            const bottomText : string = lines[1].trim();
-            const bottomTextHeight : number = ctx.measureText(bottomText).actualBoundingBoxDescent;
-            const bottomLines : string[] = StringUtils.wrapText(ctx, bottomText, canvas.width);
-            for(let i: number = 0; i < bottomLines.length; i++) {
-                ctx.fillText(bottomLines[i], canvas.width / 2, canvas.height - 10 - bottomTextHeight - (i*fontSize) , canvas.width);
-                ctx.strokeText(bottomLines[i], canvas.width / 2, canvas.height - 10 - bottomTextHeight - (i*fontSize) , canvas.width);
-            }
-        }
-
-
-        const topLines : string[] = StringUtils.wrapText(ctx, topText, canvas.width);
-        for(let i: number = 0; i < topLines.length; i++) {
-            ctx.fillText(topLines[i], canvas.width / 2, (i * fontSize) + 10, canvas.width);
-            ctx.strokeText(topLines[i], canvas.width / 2, (i * fontSize) + 10, canvas.width);
+        for(let i: number = 0; i < lines.length; i++) {
+            ctx.fillText(lines[i], canvas.width / 2, (i * fontSize) + 10, canvas.width);
         }
     }
 }

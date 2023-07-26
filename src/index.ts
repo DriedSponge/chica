@@ -4,6 +4,7 @@ import {Ping} from "./commands/Ping";
 import "dotenv/config"
 import {Meme} from "./commands/image/Meme";
 import {registerFont} from "canvas";
+import {Caption} from "./commands/image/Caption";
 const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent] });
 const commands : Collection<string, SlashCommand> = new Collection<string, SlashCommand>();
 
@@ -12,9 +13,12 @@ client.login(process.env.TOKEN).then(r => console.log("Logged in!"));
 
 commands.set("ping", new Ping());
 commands.set("meme", new Meme());
+commands.set("caption", new Caption());
 
 client.on(Events.ClientReady, async (client: Client ): Promise<void> => {
     registerFont(__dirname+"/../resources/fonts/impact.ttf", {family: "Impact"});
+    registerFont(__dirname+"/../resources/fonts/caption.otf", {family: "Caption"});
+
     console.log("Client is ready and logged in!");
         client.user.setPresence({ activities: [{ name: 'Brink' }], status: 'online' })
     const cmdsfinal: any[] = []

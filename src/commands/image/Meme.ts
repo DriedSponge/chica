@@ -33,7 +33,7 @@ export class Meme extends SlashCommand{
             const canvas: Canvas = createCanvas(image.width, image.height);
             const ctx : CanvasRenderingContext2D = canvas.getContext("2d");
             // Check if the image is static
-            if(editImage.getType() === "image/png" || editImage.getType() === "image/jpeg" || editImage.getType() === "image/jpg"){
+            if(editImage.isStatic()){
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 this.memeText(canvas, text, fontSize);
                 const buffer : Buffer = canvas.toBuffer();

@@ -23,4 +23,7 @@ export class EditImage{
     public getExtension(): string {
         return this.extension;
     }
+    public isStatic() : boolean{
+        return (this.getType() === "image/png" || this.getType() === "image/jpeg" || this.getType() === "image/jpg")
+    }
 }
