@@ -1,0 +1,13 @@
+version: '3.9'
+networks:
+  chica:
+
+services:
+  chica:
+    image: chica
+    networks:
+      - chica
+    restart: unless-stopped
+    container_name: chica_prod
+
+
