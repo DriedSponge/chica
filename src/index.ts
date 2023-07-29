@@ -7,7 +7,7 @@ import {registerFont} from "canvas";
 import {Caption} from "./commands/image/Caption";
 const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent] });
 const commands : Collection<string, SlashCommand> = new Collection<string, SlashCommand>();
-
+console.log("hi")
 client.login(process.env.TOKEN).then(r => console.log("Logged in!"));
 
 

@@ -15,13 +15,15 @@ export class Apis {
 
             })
             .catch((error) => {
-                switch (error.response.status) {
-                    case 429:
-                        throw new Error("I am being rate limited by tenor! Please try again later!");
-                    case 500:
-                        throw new Error("Tenor is having issues! Please try again later!");
-                    case 400:
-                        throw new Error("Invalid Tenor URL! Try using a different one!");
+                if(error.response){
+                    switch (error.response.status) {
+                        case 429:
+                            throw new Error("I am being rate limited by tenor! Please try again later!");
+                        case 500:
+                            throw new Error("Tenor is having issues! Please try again later!");
+                        case 400:
+                            throw new Error("Invalid Tenor URL! Try using a different one!");
+                    }
                 }
                 throw error;
             });
