@@ -14,5 +14,8 @@
 	"scripts": {
 		"start": "tsc -p ./tsconfig.json && node ./build/index.js",
 		"build": "tsc"
+	},
+	"devDependencies": {
+		"prettier": "3.0.0"
 	}
 }
