@@ -5,6 +5,8 @@ networks:
 services:
   chica:
     image: chica
+    build:
+      dockerfile: Dockerfile
     networks:
       - chica
     restart: unless-stopped
