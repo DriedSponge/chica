@@ -1,5 +1,6 @@
-import {Activity, Client, Collection, Events, GatewayIntentBits, Interaction, REST, Routes, ActivityType} from "discord.js"
+import { Client, Collection, Events, GatewayIntentBits, Interaction, REST, Routes, ActivityType} from "discord.js"
 import {SlashCommand} from "./commands/SlashCommand";
+import games from "./games";
 import {Ping} from "./commands/Ping";
 import "dotenv/config"
 import {Meme} from "./commands/image/Meme";
@@ -23,6 +24,13 @@ client.on(Events.ClientReady, async (client: Client ): Promise<void> => {
 
     client.user.setActivity('Brink', { type: ActivityType.Playing });
     client.user.setStatus('online');
+
+    //every ten minutes set the status
+    setInterval(() => {
+        const game: string = games[Math.floor(Math.random() * games.length)];
+        client.user.setActivity(game, { type: ActivityType.Playing });
+        client.user.setStatus('online');
+    }, 600000);
 
     const cmdsfinal: any[] = []
 
