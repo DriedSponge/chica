@@ -1,4 +1,4 @@
-import {Activity, Client, Collection, Events, GatewayIntentBits, Interaction, REST, Routes} from "discord.js"
+import {Activity, Client, Collection, Events, GatewayIntentBits, Interaction, REST, Routes, ActivityType} from "discord.js"
 import {SlashCommand} from "./commands/SlashCommand";
 import {Ping} from "./commands/Ping";
 import "dotenv/config"
@@ -20,7 +20,10 @@ client.on(Events.ClientReady, async (client: Client ): Promise<void> => {
     registerFont(__dirname+"/../resources/fonts/caption.otf", {family: "Caption"});
 
     console.log("Client is ready and logged in!");
-        client.user.setPresence({ activities: [{ name: 'Brink' }], status: 'online' })
+
+    client.user.setActivity('Brink', { type: ActivityType.Playing });
+    client.user.setStatus('online');
+
     const cmdsfinal: any[] = []
 
     const rest: REST = new REST().setToken(process.env.TOKEN);
