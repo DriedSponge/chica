@@ -1,18 +1,8 @@
 import { SlashCommand } from "../SlashCommand";
-import { GifFrame, GifUtil, GifCodec, Gif, BitmapImage } from "gifwrap";
-import axios from "axios";
+import { GifUtil, GifCodec, Gif, BitmapImage } from "gifwrap";
+import { Canvas, CanvasRenderingContext2D, createCanvas, Image, loadImage } from "canvas";
 import {
-	Canvas,
-	CanvasRenderingContext2D,
-	createCanvas,
-	Image,
-	loadImage,
-	registerFont
-} from "canvas";
-import {
-	Attachment,
 	ChatInputCommandInteraction,
-	CommandInteraction,
 	EmbedBuilder,
 	SlashCommandAttachmentOption,
 	SlashCommandBuilder,
