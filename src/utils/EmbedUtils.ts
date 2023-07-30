@@ -10,4 +10,28 @@ export default class EmbedUtils {
 			)
 			.addFields([{ name: "Error Message", value: error.message }]);
 	}
+
+	/**
+	 * Creates a cool gif embed.
+	 * @param width
+	 * @param height
+	 * @param frames
+	 * @param time (in seconds)
+	 * @param image
+	 */
+	public static gifEmbed(
+		width: number,
+		height: number,
+		frames: number,
+		time: number,
+		image: string
+	): EmbedBuilder {
+		const embed: EmbedBuilder = new EmbedBuilder();
+		embed.setImage(image);
+		embed.setColor("#FF69B4");
+		embed.setFooter({
+			text: `${width}x${height}  | Frames: ${frames} | Time Taken: ${time}s`
+		});
+		return embed;
+	}
 }

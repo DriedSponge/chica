@@ -138,13 +138,13 @@ export class Caption extends SlashCommand {
 				// Encode the gif
 				const codec: GifCodec = new GifCodec();
 				const gifBuffer2: Gif = await codec.encodeGif(outputFrames, { loops: gif.loops });
-				const embed: EmbedBuilder = new EmbedBuilder();
-				embed.setImage("attachment://caption." + editImage.getExtension());
-				embed.setFooter({
-					text: `${image.width}x${image.height}  | Frames: ${gif.frames.length} | Time Taken: ${
-						(Date.now() - interaction.createdTimestamp) / 1000
-					}s`
-				});
+				const embed: EmbedBuilder = EmbedUtils.gifEmbed(
+					image.width,
+					image.height,
+					gif.frames.length,
+					(Date.now() - interaction.createdTimestamp) / 1000,
+					"attachment://caption." + editImage.getExtension()
+				);
 				await interaction.followUp({
 					files: [{ attachment: gifBuffer2.buffer, name: "caption." + editImage.getExtension() }],
 					embeds: [embed]
