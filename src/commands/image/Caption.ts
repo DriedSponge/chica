@@ -11,6 +11,7 @@ import {
 import { StringUtils } from "../../utils/StringUtils";
 import { CommandUtils } from "../../utils/CommandUtils";
 import { EditImage } from "../../utils/EditImage";
+import EmbedUtils from "../../utils/EmbedUtils";
 export class Caption extends SlashCommand {
 	constructor() {
 		const data: SlashCommandBuilder = new SlashCommandBuilder();
@@ -151,7 +152,8 @@ export class Caption extends SlashCommand {
 			}
 		} catch (e) {
 			console.log(e);
-			await interaction.followUp({ content: "**Error:** " + e.message, ephemeral: true });
+			interaction.ephemeral = true;
+			await interaction.followUp({ embeds: [EmbedUtils.errorEmbed(e)] });
 		}
 	}
 	private captionText(canvas: Canvas, lines: string[], fontSize: number, yMargin: number): void {
