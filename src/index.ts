@@ -15,7 +15,7 @@ import "dotenv/config";
 import { Meme } from "./commands/image/Meme";
 import { registerFont } from "canvas";
 import { Caption } from "./commands/image/Caption";
-//import { Caption } from "./commands/image/Caption";
+import { CommandFactory, CommandName } from "./commands/CommandFactory";
 const client: Client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent]
 });
@@ -59,7 +59,7 @@ client.on(Events.ClientReady, async (client: Client): Promise<void> => {
 
 client.on(Events.InteractionCreate, async (interaction: Interaction): Promise<void> => {
 	if (!interaction.isCommand()) return;
-	commands.get(interaction.commandName)?.run(interaction);
+	CommandFactory.createCommandInstance(<CommandName>interaction.commandName).run(interaction);
 });
 
 client.login(process.env.TOKEN).then((r) => console.log("Logged in!"));
