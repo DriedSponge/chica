@@ -15,6 +15,7 @@ import "dotenv/config";
 import { Meme } from "./commands/image/Meme";
 import { registerFont } from "canvas";
 import { Caption } from "./commands/image/Caption";
+//import { Caption } from "./commands/image/Caption";
 const client: Client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent]
 });

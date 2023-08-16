@@ -7,7 +7,8 @@ import {
 	SlashCommandStringOption
 } from "discord.js";
 import { EditImage } from "../utils/EditImage";
-import { CommandUtils } from "../utils/CommandUtils";
+import { SourceImageFactory } from "../utils/SourceImageFactory";
+import { SourceImage } from "../utils/SourceImage";
 
 export abstract class ImageCommand extends SlashCommand {
 	protected constructor(data: SlashCommandBuilder) {
@@ -29,13 +30,13 @@ export abstract class ImageCommand extends SlashCommand {
 	public async execute(interaction: ChatInputCommandInteraction): Promise<void> {
 		try {
 			await interaction.deferReply();
-			const editImage: EditImage = await CommandUtils.processImageCommand(interaction);
-			this.manipulate(editImage);
+			const image: SourceImage = await SourceImageFactory.processImageCommand(interaction);
+			this.manipulate(image);
 		} catch (e) {
 			console.log(e);
 			await interaction.followUp({ content: "**Error:** " + e.message, ephemeral: true });
 		}
 	}
 
-	abstract manipulate(image: EditImage);
+	abstract manipulate(image: SourceImage);
 }

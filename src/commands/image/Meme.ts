@@ -1,10 +1,12 @@
-import { GifUtil, GifCodec, Gif, BitmapImage } from "gifwrap";
-import { Canvas, CanvasRenderingContext2D, createCanvas, Image, loadImage } from "canvas";
-import { EmbedBuilder, SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
+import { Canvas, CanvasRenderingContext2D } from "canvas";
+import { SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
 import { StringUtils } from "../../utils/StringUtils";
 import { EditImage } from "../../utils/EditImage";
-import EmbedUtils from "../../utils/EmbedUtils";
 import { ImageCommand } from "../ImageCommand";
+import * as sharp from "sharp";
+import EmbedUtils from "../../utils/EmbedUtils";
+import { Sharp } from "sharp";
+import { SourceImage } from "../../utils/SourceImage";
 export class Meme extends ImageCommand {
 	constructor() {
 		const data: SlashCommandBuilder = new SlashCommandBuilder();
@@ -20,91 +22,35 @@ export class Meme extends ImageCommand {
 		super(data);
 	}
 
-	public async manipulate(editImage: EditImage): Promise<void> {
+	public async manipulate(image: SourceImage): Promise<void> {
 		const text: string = this.interaction.options.getString("text", true);
-		const image: Image = await loadImage(editImage.getData());
-		const fontSize: number = Math.min(image.width, image.height) / 8;
-		const canvas: Canvas = createCanvas(image.width, image.height);
-		const ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-		// Check if the image is static
-		if (editImage.isStatic()) {
-			ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-			this.memeText(canvas, text, fontSize);
-			const buffer: Buffer = canvas.toBuffer();
-
-			await this.interaction.followUp({
-				files: [{ attachment: buffer, name: "meme." + editImage.getExtension() }]
-			});
-		} else {
-			// If the image is a gif, we need to process each frame
-			let gifBuffer: Buffer = editImage.getData();
-			const gif: Gif = await GifUtil.read(gifBuffer);
-			let i: number = 0;
-			for (const frame of gif.frames) {
-				i++;
-				console.log(`[${i}/${gif.frames.length}] Processing Gift Frame`);
-				// Create a canvas for the gif frame
-				const gifCanvas: Canvas = createCanvas(canvas.width, canvas.height);
-				// Get the context of the canvas
-				const gifCtx: CanvasRenderingContext2D = gifCanvas.getContext("2d");
-				// Get the image data from the frame
-				const frameImage: Buffer = frame.bitmap.data;
-				// Create an image data object from the frame
-				const frameImageData: ImageData = <ImageData>(
-					ctx.createImageData(frame.bitmap.width, frame.bitmap.height)
-				);
-				// Set the image data to the frame image
-				frameImageData.data.set(frameImage);
-				// Put the image data on the gif canvas
-				gifCtx.putImageData(frameImageData, frame.xOffset, frame.yOffset);
-				// Clear the main canvas
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				// Draw the gif frame on the main canvas
-				ctx.drawImage(
-					gifCanvas,
-					frame.xOffset,
-					frame.yOffset,
-					frame.bitmap.width,
-					frame.bitmap.height
-				);
-				// Put the text on the main canvas
-				this.memeText(canvas, text, fontSize);
-				// Get the image data from the main canvas
-				const modifiedFrameImage: ImageData = <ImageData>(
-					ctx.getImageData(frame.xOffset, frame.yOffset, frame.bitmap.width, frame.bitmap.height)
-				);
-				// Create a buffer for the image data
-				const modifiedFrameBuffer: Buffer = Buffer.alloc(modifiedFrameImage.data.length);
-				// Set the buffer to the image data
-				modifiedFrameBuffer.set(modifiedFrameImage.data);
-				// Create a bitmap image from the buffer
-				const frameBitmap: BitmapImage = new BitmapImage(
-					frame.bitmap.width,
-					frame.bitmap.height,
-					modifiedFrameBuffer
-				);
-				// Quantize the bitmap image
-				GifUtil.quantizeSorokin(frameBitmap, 256, undefined, {
-					ditherAlgorithm: "FalseFloydSteinberg"
-				}); // This is the fastest
-				// Set the frame bitmap to the quantized bitmap
-				frame.bitmap.data.set(frameBitmap.bitmap.data);
-			}
-			// Encode the gif
-			const codec: GifCodec = new GifCodec();
-			const gifBuffer2: Gif = await codec.encodeGif(gif.frames, { loops: gif.loops });
-			const embed: EmbedBuilder = EmbedUtils.gifEmbed(
-				image.width,
-				image.height,
-				gif.frames.length,
-				(Date.now() - this.interaction.createdTimestamp) / 1000,
-				"attachment://meme." + editImage.getExtension()
-			);
-			await this.interaction.followUp({
-				files: [{ attachment: gifBuffer2.buffer, name: "meme." + editImage.getExtension() }],
-				embeds: [embed]
-			});
-		}
+		const processedImage: Sharp = image.getSharpInstance();
+		const fontSize: number = Math.min(image.getWidth(), image.getHeight()) / 8;
+		const canvas = new Canvas(image.getWidth(), image.getHeight());
+		const ctx = canvas.getContext("2d");
+		ctx.font = `${fontSize}px Impact`;
+		const lines = StringUtils.wrapText(ctx, text, image.getWidth());
+		// Generate the overlay text
+		this.memeText(canvas, text, fontSize);
+		const compiledImage: Buffer = await processedImage
+			.composite([{ input: await canvas.toBuffer(), tile: true, gravity: "northwest" }])
+			.toBuffer();
+		const embed = EmbedUtils.gifEmbed(
+			image.getWidth(),
+			image.getHeight(),
+			image.getFrameCount(),
+			(Date.now() - this.interaction.createdTimestamp) / 1000,
+			"attachment://meme." + image.getExtension()
+		);
+		await this.interaction.followUp({
+			files: [
+				{
+					attachment: compiledImage,
+					name: "meme." + image.getExtension()
+				}
+			],
+			embeds: [embed]
+		});
 	}
 	private memeText(canvas: Canvas, text: string, fontSize: number): void {
 		let ctx: CanvasRenderingContext2D = canvas.getContext("2d");
