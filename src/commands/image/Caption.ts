@@ -6,6 +6,7 @@ import { ImageCommand } from "../ImageCommand";
 import { SourceImage } from "../../utils/SourceImage";
 import * as sharp from "sharp";
 import { Sharp } from "sharp";
+import * as fs from "fs";
 export class Caption extends ImageCommand {
 	constructor() {
 		const data: SlashCommandBuilder = new SlashCommandBuilder();
@@ -23,6 +24,7 @@ export class Caption extends ImageCommand {
 
 	public async manipulate(editImage: SourceImage): Promise<void> {
 		const text: string = this.interaction.options.getString("text", true);
+		await editImage.getSharpInstance().toFile(__dirname + "/input.gif");
 		const fontSize: number = Math.min(editImage.getWidth(), editImage.getHeight()) / 10;
 		const tempCanvas: Canvas = new Canvas(editImage.getWidth(), editImage.getHeight());
 		const tempCtx: CanvasRenderingContext2D = tempCanvas.getContext("2d");
@@ -58,6 +60,8 @@ export class Caption extends ImageCommand {
 				gravity: "northwest"
 			}
 		]);
+		await captionBackdrop.toFile(__dirname + "/output.gif");
+
 		const embed: EmbedBuilder = EmbedUtils.gifEmbed(
 			editImage.getWidth(),
 			height,

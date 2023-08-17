@@ -16,6 +16,7 @@ import { Meme } from "./commands/image/Meme";
 import { registerFont } from "canvas";
 import { Caption } from "./commands/image/Caption";
 import { CommandFactory, CommandName } from "./commands/CommandFactory";
+import { Flop } from "./commands/image/Flop";
 const client: Client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent]
 });
@@ -24,6 +25,7 @@ const commands: Collection<string, SlashCommand> = new Collection<string, SlashC
 commands.set("ping", new Ping());
 commands.set("meme", new Meme());
 commands.set("caption", new Caption());
+commands.set("flip", new Flop());
 
 client.on(Events.ClientReady, async (client: Client): Promise<void> => {
 	registerFont(__dirname + "/../resources/fonts/impact.ttf", { family: "Impact" });
