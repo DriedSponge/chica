@@ -4,6 +4,6 @@ RUN apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev
 COPY . .
 
 RUN yarn install
-RUN yar install --os=linux --cpu=x64 sharp
+RUN yarn add sharp --ignore-engines
 
 ENTRYPOINT ["yarn","run","start"]
